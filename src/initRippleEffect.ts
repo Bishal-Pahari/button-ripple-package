@@ -43,10 +43,17 @@ function attachRipple(el: HTMLElement) {
 
   applyOptions();
 
-  const createRipple = (e: PointerEvent | TouchEvent) => {
+  const createRipple = (e: Event) => {
     const rect = el.getBoundingClientRect();
-    const clientX = 'clientX' in e ? e.clientX : e.touches[0]?.clientX ?? 0;
-    const clientY = 'clientY' in e ? e.clientY : e.touches[0]?.clientY ?? 0;
+    const pointerEvent = e as PointerEvent | TouchEvent;
+    const clientX =
+      'clientX' in pointerEvent
+        ? pointerEvent.clientX
+        : pointerEvent.touches[0]?.clientX ?? 0;
+    const clientY =
+      'clientY' in pointerEvent
+        ? pointerEvent.clientY
+        : pointerEvent.touches[0]?.clientY ?? 0;
 
     const radius = findFurthestPoint(
       clientX,

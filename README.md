@@ -1,4 +1,4 @@
-# react-ripple-effect
+# @rocket2mars/react-ripple-effect
 
 A lightweight, zero-dependency ripple effect library for React. No wrapper components needed - just add data attributes!
 
@@ -14,7 +14,7 @@ A lightweight, zero-dependency ripple effect library for React. No wrapper compo
 ## Installation
 
 ```bash
-npm install react-ripple-effect
+npm install @rocket2mars/react-ripple-effect
 ```
 
 ## Quick Start
@@ -22,8 +22,8 @@ npm install react-ripple-effect
 ### Option 1: Using the React Hook (Recommended)
 
 ```tsx
-import { useRippleEffect } from "react-ripple-effect";
-import "react-ripple-effect/dist/styles.css";
+import { useRippleEffect } from "@rocket2mars/react-ripple-effect";
+import "@rocket2mars/react-ripple-effect/dist/styles.css";
 
 function App() {
   useRippleEffect();
@@ -45,8 +45,8 @@ function App() {
 
 ```tsx
 import { useEffect } from "react";
-import { initRippleEffect } from "react-ripple-effect";
-import "react-ripple-effect/dist/styles.css";
+import { initRippleEffect } from "@rocket2mars/react-ripple-effect";
+import "@rocket2mars/react-ripple-effect/dist/styles.css";
 
 function App() {
   useEffect(() => {
@@ -157,7 +157,7 @@ You can also customize the `.ripple-host` class to match your design:
 Manually initialize ripple effects on all matching elements in the document.
 
 ```tsx
-import { initRippleEffect } from "react-ripple-effect";
+import { initRippleEffect } from "@rocket2mars/react-ripple-effect";
 
 initRippleEffect();
 ```
@@ -167,7 +167,7 @@ initRippleEffect();
 React hook that initializes ripple effects on mount.
 
 ```tsx
-import { useRippleEffect } from "react-ripple-effect";
+import { useRippleEffect } from "@rocket2mars/react-ripple-effect";
 
 function App() {
   useRippleEffect();

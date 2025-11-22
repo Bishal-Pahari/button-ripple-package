@@ -27,6 +27,7 @@ export default {
       tsconfig: "./tsconfig.json",
       declaration: true,
       declarationDir: "./dist",
+      tslib: "tslib",
     }),
     postcss({
       extract: "styles.css",
