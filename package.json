@@ -1,6 +1,6 @@
 {
   "name": "@rocket2mars/react-ripple-effect",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "A lightweight, zero-dependency ripple effect library for React. No wrapper components needed - just add data attributes!",
   "main": "dist/index.js",
