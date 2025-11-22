@@ -1,0 +1,41 @@
+{
+  "name": "react-ripple-effect",
+  "version": "1.0.0",
+  "description": "A lightweight, zero-dependency ripple effect library for React. No wrapper components needed - just add data attributes!",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "react",
+    "ripple",
+    "effect",
+    "animation",
+    "button",
+    "material",
+    "ui"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/react": "^18.2.45",
+    "rollup": "^4.6.1",
+    "rollup-plugin-postcss": "^4.0.2",
+    "typescript": "^5.3.3"
+  }
+}
+
