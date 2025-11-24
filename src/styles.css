@@ -3,7 +3,6 @@
   --ripple-duration: 0.4s;
 }
 
-/* Minimal styles required for ripple effect - no button styling */
 .ripple-host,
 [data-ripple-color] {
   position: relative;

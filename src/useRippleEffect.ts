@@ -1,27 +1,9 @@
-import { useEffect } from 'react';
-import { initRippleEffect } from './initRippleEffect';
+import { useEffect } from "react";
 
-/**
- * React hook to initialize ripple effects.
- * Call this once in your root component or App component.
- *
- * @example
- * ```tsx
- * function App() {
- *   useRippleEffect();
- *
- *   return (
- *     <button className="ripple-host" data-ripple-color="rgba(255,255,255,0.3)">
- *       Click me
- *     </button>
- *   );
- * }
- * ```
- */
+import { initRippleEffect } from "./initRippleEffect";
+
 export function useRippleEffect() {
   useEffect(() => {
-    const cleanup = initRippleEffect();
-    return cleanup;
+    return initRippleEffect();
   }, []);
 }
-

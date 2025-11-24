@@ -150,13 +150,11 @@ export function initRippleEffect() {
         subtree: true,
       });
     } else {
-      // Wait for DOMContentLoaded if body doesn't exist yet
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", startObserving, {
           once: true,
         });
       } else {
-        // Fallback: observe document.documentElement if body still doesn't exist
         observer.observe(document.documentElement, {
           childList: true,
           subtree: true,
@@ -167,7 +165,6 @@ export function initRippleEffect() {
 
   startObserving();
 
-  // Return cleanup function (useful for testing or manual cleanup)
   return () => {
     observer.disconnect();
   };
