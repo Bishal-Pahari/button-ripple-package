@@ -20,7 +20,8 @@ import { initRippleEffect } from './initRippleEffect';
  */
 export function useRippleEffect() {
   useEffect(() => {
-    initRippleEffect();
+    const cleanup = initRippleEffect();
+    return cleanup;
   }, []);
 }
 
