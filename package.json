@@ -43,7 +43,7 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-typescript": "^11.1.5",
+    "@rollup/plugin-typescript": "^12.3.0",
     "@types/react": "^18.2.45",
     "rollup": "^4.6.1",
     "rollup-plugin-postcss": "^4.0.2",
