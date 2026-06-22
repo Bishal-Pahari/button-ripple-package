@@ -1,8 +1,16 @@
 {
   "name": "@rocket2mars/react-ripple-effect",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "type": "module",
   "description": "A lightweight, zero-dependency ripple effect library for React. No wrapper components needed - just add data attributes!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bishal-Pahari/button-ripple-package.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Bishal-Pahari/button-ripple-package/issues"
+  },
+  "homepage": "https://github.com/Bishal-Pahari/button-ripple-package#readme",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",

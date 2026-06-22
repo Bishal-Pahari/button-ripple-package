@@ -9,6 +9,23 @@ const OUT_EVENTS = [
   "touchcancel",
 ];
 
+// Ripples live inside this clipping container instead of the host element so
+// they never inflate the host's scrollHeight (which would break accordions /
+// expandables that animate height from a measured scrollHeight).
+const RIPPLE_CONTAINER_CLASS = "ripple-container";
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max);
+
+// Validate a user-supplied color with the browser's own CSS parser so an
+// attacker-controlled `data-ripple-color` value cannot be injected verbatim
+// into the CSSOM via setProperty. Fail closed (use the default) when we can't
+// validate.
+const isSafeColor = (value: string) =>
+  typeof CSS !== "undefined" &&
+  typeof CSS.supports === "function" &&
+  CSS.supports("color", value);
+
 function findFurthestPoint(
   clickX: number,
   elWidth: number,
@@ -31,14 +48,47 @@ function attachRipple(el: HTMLElement) {
     const max = el.dataset.rippleMaxRadius;
     const center = el.dataset.rippleCenter;
 
-    if (color) el.style.setProperty("--ripple-color", color);
-    if (duration) el.style.setProperty("--ripple-duration", `${duration}s`);
-    if (max) maxRadius = Number(max);
+    // Only forward a value the browser confirms is a valid CSS color
+    if (color && isSafeColor(color)) {
+      el.style.setProperty("--ripple-color", color);
+    }
+
+    if (duration) {
+      const seconds = Number(duration);
+      if (Number.isFinite(seconds) && seconds >= 0) {
+        el.style.setProperty("--ripple-duration", `${clamp(seconds, 0, 60)}s`);
+      }
+    }
+
+    if (max) {
+      const radius = Number(max);
+      if (Number.isFinite(radius) && radius > 0) {
+        maxRadius = clamp(radius, 1, 100000);
+      }
+    }
 
     el.dataset.rippleCenter = center === "true" ? "true" : "false";
   };
 
   applyOptions();
+
+  // Lazily create (and re-attach, in case a re-render removed it) the clipping
+  // container that holds the ripples.
+  let container: HTMLElement | null = null;
+  const ensureContainer = () => {
+    if (!container || !container.isConnected) {
+      container = el.querySelector<HTMLElement>(
+        `:scope > .${RIPPLE_CONTAINER_CLASS}`
+      );
+      if (!container) {
+        container = document.createElement("span");
+        container.className = RIPPLE_CONTAINER_CLASS;
+        container.setAttribute("aria-hidden", "true");
+        el.appendChild(container);
+      }
+    }
+    return container;
+  };
 
   const createRipple = (e: Event) => {
     const rect = el.getBoundingClientRect();
@@ -78,7 +128,7 @@ function attachRipple(el: HTMLElement) {
     ripple.style.top = `${top}px`;
     ripple.style.left = `${left}px`;
 
-    el.appendChild(ripple);
+    ensureContainer().appendChild(ripple);
 
     const durationMs =
       parseFloat(getComputedStyle(el).getPropertyValue("--ripple-duration")) *
@@ -150,13 +200,11 @@ export function initRippleEffect() {
         subtree: true,
       });
     } else {
-      // Wait for DOMContentLoaded if body doesn't exist yet
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", startObserving, {
           once: true,
         });
       } else {
-        // Fallback: observe document.documentElement if body still doesn't exist
         observer.observe(document.documentElement, {
           childList: true,
           subtree: true,
@@ -167,7 +215,6 @@ export function initRippleEffect() {
 
   startObserving();
 
-  // Return cleanup function (useful for testing or manual cleanup)
   return () => {
     observer.disconnect();
   };

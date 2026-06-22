@@ -3,11 +3,26 @@
   --ripple-duration: 0.4s;
 }
 
-/* Minimal styles required for ripple effect - no button styling */
 .ripple-host,
 [data-ripple-color] {
   position: relative;
   overflow: hidden;
+}
+
+/* Clipping layer for ripples. Because it is absolutely positioned and pinned
+   to the host's box, an oversized ripple inside it is clipped here and never
+   contributes to the host's scrollHeight — so accordions / expandables that
+   animate to a measured height are not pushed past their real content size. */
+.ripple-host > .ripple-container,
+[data-ripple-color] > .ripple-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .ripple-host .ripple,
