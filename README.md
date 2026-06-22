@@ -50,7 +50,7 @@ import "@rocket2mars/react-ripple-effect/dist/styles.css";
 
 function App() {
   useEffect(() => {
-    initRippleEffect();
+    return initRippleEffect();
   }, []);
 
   return (
@@ -81,6 +81,8 @@ Use data attributes to customize the ripple effect:
 | `data-ripple-duration`   | Animation duration in seconds                    | `0.4`              |
 | `data-ripple-max-radius` | Maximum ripple radius in pixels                  | `2000`             |
 | `data-ripple-center`     | Center the ripple effect (`"true"` or `"false"`) | `"false"`          |
+
+> Values are validated: an invalid `data-ripple-color` is ignored (the default is used), and `data-ripple-duration` / `data-ripple-max-radius` are coerced to numbers and clamped to safe ranges.
 
 ### Examples
 
@@ -154,17 +156,25 @@ You can also customize the `.ripple-host` class to match your design:
 
 ### `initRippleEffect()`
 
-Manually initialize ripple effects on all matching elements in the document.
+Initializes ripple effects on all matching elements currently in the document, and
+starts a `MutationObserver` so elements added later (e.g. by a React re-render) get
+ripples automatically.
+
+Returns a cleanup function that disconnects the observer — call it when you're done
+(for example on unmount).
 
 ```tsx
 import { initRippleEffect } from "@rocket2mars/react-ripple-effect";
 
-initRippleEffect();
+const cleanup = initRippleEffect();
+// later, to stop observing:
+cleanup();
 ```
 
 ### `useRippleEffect()`
 
-React hook that initializes ripple effects on mount.
+React hook that initializes ripple effects on mount and automatically cleans up
+(disconnects the observer) on unmount.
 
 ```tsx
 import { useRippleEffect } from "@rocket2mars/react-ripple-effect";
@@ -182,7 +192,7 @@ The library automatically attaches ripple effects to any element that:
 - Has the `ripple-host` class, OR
 - Has a `data-ripple-color` attribute
 
-When you call `initRippleEffect()` or use `useRippleEffect()`, it searches for all matching elements and attaches event listeners for pointer and touch events. The ripple effect is created dynamically based on the click/touch position.
+When you call `initRippleEffect()` or use `useRippleEffect()`, it searches for all matching elements and attaches event listeners for pointer and touch events. It also watches the DOM with a `MutationObserver`, so elements added later (e.g. by a React re-render) get ripple effects automatically. The ripple effect is created dynamically based on the click/touch position, inside a clipping layer so it never affects the host element's layout.
 
 ## Browser Support
 
@@ -191,6 +201,15 @@ When you call `initRippleEffect()` or use `useRippleEffect()`, it searches for a
 - Safari (latest)
 - Edge (latest)
 - Mobile browsers (iOS Safari, Chrome Mobile)
+
+## Security
+
+This package is published from CI using npm **Trusted Publishing (OIDC)** with
+**provenance**, installs are locked (`npm ci`) with dependency install scripts
+disabled, and `data-ripple-*` inputs are validated before use. You can verify
+the published artifacts with `npm audit signatures`. See
+[SECURITY.md](./SECURITY.md) for the full policy and how to report a
+vulnerability.
 
 ## License
 

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ripple × Accordion — height-jump repro</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 760px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        color: #1f2937;
+      }
+      h1 { font-size: 1.25rem; }
+      .row { display: flex; gap: 0.5rem; align-items: center; margin: 1rem 0; }
+      code { background: #f3f4f6; padding: 0 4px; border-radius: 4px; }
+
+      /* ---- mirrors src/styles.css ---- */
+      .ripple-host {
+        position: relative;
+        overflow: hidden;
+      }
+      .ripple-host > .ripple-container {
+        position: absolute;
+        top: 0; right: 0; bottom: 0; left: 0;
+        overflow: hidden;
+        border-radius: inherit;
+        pointer-events: none;
+      }
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+        background-color: rgba(0, 0, 0, 0.15);
+        animation: ripple 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      @keyframes ripple { from { transform: scale(0); } to { transform: scale(1); } }
+
+      /* ---- a scrollHeight-measuring accordion, like Radix / MUI / framer ---- */
+      .accordion { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin: 0.75rem 0; }
+      .trigger {
+        width: 100%;
+        text-align: left;
+        font: inherit;
+        padding: 14px 16px;
+        border: 0;
+        background: #f9fafb;
+        cursor: pointer;
+      }
+      .panel {
+        height: 0;
+        overflow: hidden;
+        transition: height 300ms ease;
+      }
+      .panel-inner { padding: 16px; }
+      .readout { font-variant-numeric: tabular-nums; color: #6b7280; }
+      .pass { color: #047857; font-weight: 600; }
+      .fail { color: #b91c1c; font-weight: 600; }
+      #selftest { border-top: 1px solid #e5e7eb; margin-top: 2rem; padding-top: 1rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Ripple × Accordion — height-jump repro</h1>
+    <p>
+      The accordion below animates open by measuring its content's
+      <code>scrollHeight</code> (exactly what Radix, MUI Collapse, Headless UI
+      and framer-motion auto-height do). The toggle controls where the ripple
+      <code>&lt;div&gt;</code> is appended.
+    </p>
+
+    <div class="row">
+      <label>
+        <input type="checkbox" id="mode" />
+        Use the <strong>old</strong> placement (ripple appended directly to host)
+      </label>
+    </div>
+    <p class="readout" id="modeLabel"></p>
+
+    <div class="accordion">
+      <button class="trigger ripple-host" id="trigger">▸ Click to expand</button>
+      <div class="panel" id="panel">
+        <div class="panel-inner">
+          <p>Real content. The panel should glide straight to this height.</p>
+          <p>
+            With the <em>old</em> placement, watch the measured target
+            <code>scrollHeight</code> spike to thousands of px the instant you
+            click, so the panel overshoots, then snaps back once the ripple is
+            removed (~400&nbsp;ms). With the <em>fixed</em> placement the
+            measured height stays equal to the real content height.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <p class="readout" id="measure">measured target height: —</p>
+
+    <section id="selftest">
+      <h2 style="font-size:1rem">Automated invariant check</h2>
+      <p class="readout">
+        Appends an oversized (4000&nbsp;px) ripple two ways and checks whether
+        the host's <code>scrollHeight</code> changes.
+      </p>
+      <div id="results"></div>
+    </section>
+
+    <script>
+      // ---- ripple creation, mirroring src/initRippleEffect.ts ----
+      function ensureContainer(host) {
+        let c = host.querySelector(":scope > .ripple-container");
+        if (!c) {
+          c = document.createElement("span");
+          c.className = "ripple-container";
+          c.setAttribute("aria-hidden", "true");
+          host.appendChild(c);
+        }
+        return c;
+      }
+
+      function makeRipple(host, x, y, oldPlacement) {
+        const rect = host.getBoundingClientRect();
+        const size = 4000; // the default max ripple size (maxRadius 2000 * 2)
+        const ripple = document.createElement("div");
+        ripple.className = "ripple";
+        ripple.style.width = ripple.style.height = size + "px";
+        ripple.style.top = y - rect.top - size / 2 + "px";
+        ripple.style.left = x - rect.left - size / 2 + "px";
+        (oldPlacement ? host : ensureContainer(host)).appendChild(ripple);
+        setTimeout(() => ripple.remove(), 400);
+      }
+
+      // ---- interactive accordion ----
+      const trigger = document.getElementById("trigger");
+      const panel = document.getElementById("panel");
+      const measure = document.getElementById("measure");
+      const mode = document.getElementById("mode");
+      const modeLabel = document.getElementById("modeLabel");
+      let open = false;
+
+      function refreshModeLabel() {
+        modeLabel.textContent = mode.checked
+          ? "MODE: old placement — expect an overshoot/snap-back on expand"
+          : "MODE: fixed placement (container) — expect a clean expand";
+      }
+      mode.addEventListener("change", refreshModeLabel);
+      refreshModeLabel();
+
+      trigger.addEventListener("pointerdown", (e) =>
+        makeRipple(trigger, e.clientX, e.clientY, mode.checked)
+      );
+
+      trigger.addEventListener("click", () => {
+        open = !open;
+        trigger.textContent = (open ? "▾" : "▸") + " Click to expand";
+        if (open) {
+          // measure on the next frame — same timing real libraries use
+          requestAnimationFrame(() => {
+            const target = panel.scrollHeight;
+            measure.textContent = "measured target height: " + target + "px";
+            panel.style.height = target + "px";
+          });
+        } else {
+          panel.style.height = "0px";
+          measure.textContent = "measured target height: —";
+        }
+      });
+      panel.addEventListener("transitionend", () => {
+        if (open) panel.style.height = "auto";
+      });
+
+      // ---- automated invariant check ----
+      function runSelfTest() {
+        const results = document.getElementById("results");
+        function check(label, oldPlacement) {
+          const host = document.createElement("div");
+          host.className = "ripple-host";
+          host.style.width = "200px";
+          host.innerHTML = "<div style='height:120px'>content</div>";
+          document.body.appendChild(host);
+          const before = host.scrollHeight;
+          const r = host.getBoundingClientRect();
+          makeRipple(host, r.left + 100, r.top + 20, oldPlacement);
+          const after = host.scrollHeight;
+          document.body.removeChild(host);
+          const inflated = after > before + 1;
+          const ok = oldPlacement ? inflated : !inflated;
+          return `<p>${label}: scrollHeight ${before}px → ${after}px —
+            <span class="${ok ? "pass" : "fail"}">${
+              oldPlacement
+                ? inflated
+                  ? "inflated (bug reproduced ✓)"
+                  : "not inflated (could not reproduce)"
+                : inflated
+                ? "INFLATED — FIX FAILED ✗"
+                : "unchanged (fix verified ✓)"
+            }</span></p>`;
+        }
+        results.innerHTML =
+          check("Old placement (ripple → host)", true) +
+          check("Fixed placement (ripple → container)", false);
+      }
+      runSelfTest();
+    </script>
+  </body>
+</html>
