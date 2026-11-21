@@ -33,15 +33,23 @@
   background-color: var(--ripple-color);
   transform: translate3d(0, 0, 0);
   animation: ripple var(--ripple-duration) cubic-bezier(0.4, 0, 0.2, 1);
+  /* Keep in sync with FADE_OUT_MS in initRippleEffect.ts. */
   transition: opacity 0.6s;
 }
 
 .ripple-host[data-ripple-center="true"] .ripple,
 [data-ripple-color][data-ripple-center="true"] .ripple {
-  top: 50% !important;
-  left: 50% !important;
-  translate: -50% -50% !important;
+  /* Position is set in JS (initRippleEffect.ts) for older-browser support. */
   animation-duration: calc(var(--ripple-duration) + 0.2s);
+}
+
+/* Respect the OS "reduce motion" setting: show the ripple without the
+   expanding animation; the opacity fade-out still gives press feedback. */
+@media (prefers-reduced-motion: reduce) {
+  .ripple-host .ripple,
+  [data-ripple-color] .ripple {
+    animation: none;
+  }
 }
 
 @keyframes ripple {
